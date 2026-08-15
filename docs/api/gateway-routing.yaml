@@ -1,0 +1,205 @@
+openapi: 3.0.3
+info:
+  title: Supermarket ERP — API Gateway Route Map
+  description: |
+    Phase 7 routing via Spring Cloud Gateway. All external clients call port 8080 on the gateway.
+    Lower route order values are evaluated first. Internal service-to-service paths (`/internal/**`)
+    are not exposed through the gateway.
+  version: 0.7.0
+
+servers:
+  - url: http://localhost:8080
+    description: Local API gateway
+
+paths:
+  /api/v1/auth/{path}:
+    post:
+      summary: Authentication
+      tags: [auth-service]
+      parameters:
+        - name: path
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: Proxied to auth-service
+
+  /api/v1/users/{path}:
+    get:
+      summary: User management
+      tags: [auth-service]
+      parameters:
+        - name: path
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: Proxied to auth-service
+
+  /api/v1/products/{path}:
+    get:
+      summary: Product catalog
+      tags: [catalog-service]
+      parameters:
+        - name: path
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: Proxied to catalog-service
+
+  /api/v1/inventory/{path}:
+    get:
+      summary: Inventory operations
+      tags: [inventory-service]
+      parameters:
+        - name: path
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: Proxied to inventory-service
+
+  /api/v1/sales/{path}:
+    get:
+      summary: Sales and POS
+      tags: [sales-service]
+      parameters:
+        - name: path
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: Proxied to sales-service
+
+  /api/v1/purchases/{path}:
+    get:
+      summary: Procurement
+      tags: [procurement-service]
+      parameters:
+        - name: path
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: Proxied to procurement-service
+
+  /api/v1/dashboard/{path}:
+    get:
+      summary: Analytics dashboard
+      tags: [analytics-service]
+      parameters:
+        - name: path
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: Proxied to analytics-service
+
+  /api/v1/platform/{path}:
+    get:
+      summary: Platform settings
+      tags: [platform-service]
+      parameters:
+        - name: path
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: Proxied to platform-service
+
+x-gateway-routes:
+  - id: health
+    order: 5
+    uri: lb://platform-service
+    predicates:
+      - Path=/api/v1/health
+
+  - id: auth-service
+    order: 10
+    uri: lb://auth-service
+    predicates:
+      - Path=/api/v1/auth/**,/api/v1/users/**,/api/v1/roles/**,/api/v1/permissions/**
+
+  - id: catalog-service
+    order: 20
+    uri: lb://catalog-service
+    predicates:
+      - Path=/api/v1/products/**,/api/v1/categories/**,/api/v1/brands/**,/api/v1/units/**,/api/v1/barcodes/**
+
+  - id: inventory-service
+    order: 30
+    uri: lb://inventory-service
+    predicates:
+      - Path=/api/v1/inventory/**,/api/v1/stock-batches/**,/api/v1/warehouses/**
+
+  - id: procurement-service
+    order: 40
+    uri: lb://procurement-service
+    predicates:
+      - Path=/api/v1/suppliers/**,/api/v1/purchases/**
+
+  - id: sales-service
+    order: 50
+    uri: lb://sales-service
+    predicates:
+      - Path=/api/v1/customers/**,/api/v1/sales/**,/api/v1/promotions/**,/api/v1/pos/**
+
+  - id: operations-service
+    order: 60
+    uri: lb://operations-service
+    predicates:
+      - Path=/api/v1/expenses/**,/api/v1/losses/**,/api/v1/hr/**,/api/v1/payroll/**
+
+  - id: analytics-service
+    order: 70
+    uri: lb://analytics-service
+    predicates:
+      - Path=/api/v1/dashboard/**,/api/v1/reports/**,/api/v1/financial/**,/api/v1/ai/**
+
+  - id: platform-service
+    order: 80
+    uri: lb://platform-service
+    predicates:
+      - Path=/api/v1/platform/**
+
+  - id: notification-service
+    order: 90
+    uri: lb://notification-service
+    predicates:
+      - Path=/api/v1/notifications/**
+
+x-internal-endpoints:
+  inventory-service:
+    - POST /api/v1/inventory/internal/receive
+    - POST /api/v1/inventory/internal/allocate
+    - POST /api/v1/inventory/internal/return
+    - POST /api/v1/inventory/internal/deduct-return
+  catalog-service:
+    - GET /api/v1/products/internal/{id}
+    - GET /api/v1/products/internal?organizationId={uuid}
+
+x-gateway-headers:
+  inbound: [Authorization]
+  propagated: [Authorization, X-User-Id, X-User-Roles]
+
+x-service-registry:
+  eurekaUrl: http://localhost:8761/eureka/
+  services:
+    - { name: auth-service, port: 8081 }
+    - { name: catalog-service, port: 8082 }
+    - { name: inventory-service, port: 8083 }
+    - { name: procurement-service, port: 8084 }
+    - { name: sales-service, port: 8085 }
+    - { name: operations-service, port: 8086 }
+    - { name: analytics-service, port: 8087 }
+    - { name: platform-service, port: 8088 }
+    - { name: notification-service, port: 8089 }

@@ -1,0 +1,51 @@
+{
+  "app": {
+    "title": "نظام السوبرماركت"
+  },
+  "nav": {
+    "dashboard": "لوحة التحكم",
+    "users": "المستخدمون",
+    "products": "المنتجات",
+    "warehouse": "المستودعات",
+    "inventory": "المخزون",
+    "suppliers": "الموردون",
+    "purchases": "المشتريات",
+    "customers": "العملاء",
+    "sales": "المبيعات",
+    "pos": "نقطة البيع",
+    "expenses": "المصروفات",
+    "hr": "الموارد البشرية",
+    "reports": "التقارير",
+    "notifications": "الإشعارات"
+  },
+  "auth": {
+    "login": "تسجيل الدخول",
+    "email": "البريد الإلكتروني",
+    "password": "كلمة المرور",
+    "signIn": "دخول",
+    "logout": "خروج",
+    "welcome": "مرحباً بعودتك",
+    "subtitle": "سجّل الدخول إلى حسابك",
+    "organizationId": "معرّف المؤسسة"
+  },
+  "branch": {
+    "select": "الفرع"
+  },
+  "lang": {
+    "switch": "تغيير اللغة"
+  },
+  "common": {
+    "name": "الاسم",
+    "noData": "لا توجد سجلات",
+    "save": "حفظ",
+    "cancel": "إلغاء",
+    "refresh": "تحديث",
+    "close": "إغلاق"
+  },
+  "pos": {
+    "barcode": "الباركود",
+    "addItem": "إضافة",
+    "checkout": "الدفع",
+    "sync": "مزامنة المبيعات"
+  }
+}

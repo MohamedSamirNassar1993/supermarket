@@ -1,0 +1,4 @@
+C:\projects\Supermarket\services\api-gateway\src\main\java\com\supermarket\gateway\ApiGatewayApplication.java
+C:\projects\Supermarket\services\api-gateway\src\main\java\com\supermarket\gateway\config\CorsConfig.java
+C:\projects\Supermarket\services\api-gateway\src\main\java\com\supermarket\gateway\config\GatewaySecurityConfig.java
+C:\projects\Supermarket\services\api-gateway\src\main\java\com\supermarket\gateway\filter\JwtHeaderPropagationFilter.java

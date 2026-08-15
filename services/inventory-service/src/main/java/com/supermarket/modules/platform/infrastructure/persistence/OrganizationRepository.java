@@ -1,0 +1,13 @@
+package com.supermarket.modules.platform.infrastructure.persistence;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import java.util.Optional;
+import java.util.UUID;
+
+public interface OrganizationRepository extends JpaRepository<OrganizationEntity, UUID> {
+
+    Optional<OrganizationEntity> findByCode(String code);
+
+    boolean existsByCode(String code);
+}

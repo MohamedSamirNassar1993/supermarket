@@ -1,0 +1,4 @@
+com\supermarket\gateway\config\GatewaySecurityConfig.class
+com\supermarket\gateway\ApiGatewayApplication.class
+com\supermarket\gateway\config\CorsConfig.class
+com\supermarket\gateway\filter\JwtHeaderPropagationFilter.class

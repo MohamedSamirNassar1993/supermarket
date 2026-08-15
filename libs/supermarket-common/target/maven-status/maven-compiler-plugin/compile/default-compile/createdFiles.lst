@@ -1,0 +1,15 @@
+com\supermarket\common\api\ApiResponse.class
+com\supermarket\common\api\PageResponse$PageResponseBuilder.class
+com\supermarket\common\api\ApiResponse$ApiResponseBuilder.class
+com\supermarket\common\security\JwtProperties.class
+com\supermarket\common\api\ApiResponse$FieldError.class
+com\supermarket\common\events\DomainEvent.class
+com\supermarket\common\events\StockAllocatedEvent.class
+com\supermarket\common\security\JwtTokenValidator.class
+com\supermarket\common\api\PageResponse.class
+com\supermarket\common\events\LoginSuccessEvent.class
+com\supermarket\common\events\StockReceivedEvent.class
+com\supermarket\common\events\SaleCompletedEvent.class
+com\supermarket\common\api\ErrorCode.class
+com\supermarket\common\events\LowStockAlertEvent.class
+com\supermarket\common\events\UserCreatedEvent.class

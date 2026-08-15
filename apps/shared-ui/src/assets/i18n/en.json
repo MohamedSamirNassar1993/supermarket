@@ -1,0 +1,51 @@
+{
+  "app": {
+    "title": "Supermarket ERP"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "users": "Users",
+    "products": "Products",
+    "warehouse": "Warehouse",
+    "inventory": "Inventory",
+    "suppliers": "Suppliers",
+    "purchases": "Purchases",
+    "customers": "Customers",
+    "sales": "Sales",
+    "pos": "POS",
+    "expenses": "Expenses",
+    "hr": "HR",
+    "reports": "Reports",
+    "notifications": "Notifications"
+  },
+  "auth": {
+    "login": "Login",
+    "email": "Email",
+    "password": "Password",
+    "signIn": "Sign In",
+    "logout": "Logout",
+    "welcome": "Welcome Back",
+    "subtitle": "Sign in to your account",
+    "organizationId": "Organization ID"
+  },
+  "branch": {
+    "select": "Branch"
+  },
+  "lang": {
+    "switch": "Switch Language"
+  },
+  "common": {
+    "name": "Name",
+    "noData": "No records found",
+    "save": "Save",
+    "cancel": "Cancel",
+    "refresh": "Refresh",
+    "close": "Close"
+  },
+  "pos": {
+    "barcode": "Barcode",
+    "addItem": "Add Item",
+    "checkout": "Checkout",
+    "sync": "Sync Offline Sales"
+  }
+}

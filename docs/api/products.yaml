@@ -1,0 +1,225 @@
+openapi: 3.0.3
+info:
+  title: Supermarket ERP — Products API
+  description: Product catalog endpoints including categories, brands, products, variants, barcodes, price history, and dynamic pricing.
+  version: 0.3.0
+
+servers:
+  - url: http://localhost:8080
+
+tags:
+  - name: Categories
+  - name: Brands
+  - name: Products
+
+paths:
+  /api/v1/categories:
+    get:
+      tags: [Categories]
+      summary: List categories
+      parameters:
+        - name: organizationId
+          in: query
+          required: true
+          schema: { type: string, format: uuid }
+        - name: active
+          in: query
+          schema: { type: boolean }
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/SizeParam'
+      responses:
+        '200':
+          description: Paginated categories
+    post:
+      tags: [Categories]
+      summary: Create category
+      responses:
+        '201':
+          description: Created
+
+  /api/v1/categories/{id}:
+    get:
+      tags: [Categories]
+      summary: Get category
+      parameters:
+        - name: organizationId
+          in: query
+          required: true
+          schema: { type: string, format: uuid }
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: Category details
+    put:
+      tags: [Categories]
+      summary: Update category
+      responses:
+        '200':
+          description: Updated
+    delete:
+      tags: [Categories]
+      summary: Deactivate category
+      responses:
+        '200':
+          description: Deactivated
+
+  /api/v1/brands:
+    get:
+      tags: [Brands]
+      summary: List brands
+      parameters:
+        - name: organizationId
+          in: query
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: Paginated brands
+    post:
+      tags: [Brands]
+      summary: Create brand
+      responses:
+        '201':
+          description: Created
+
+  /api/v1/brands/{id}:
+    get:
+      tags: [Brands]
+      summary: Get brand
+      responses:
+        '200':
+          description: Brand details
+    put:
+      tags: [Brands]
+      summary: Update brand
+      responses:
+        '200':
+          description: Updated
+    delete:
+      tags: [Brands]
+      summary: Deactivate brand
+      responses:
+        '200':
+          description: Deactivated
+
+  /api/v1/products:
+    get:
+      tags: [Products]
+      summary: List products
+      parameters:
+        - name: organizationId
+          in: query
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: Paginated products
+    post:
+      tags: [Products]
+      summary: Create product
+      responses:
+        '201':
+          description: Created
+
+  /api/v1/products/{id}:
+    get:
+      tags: [Products]
+      summary: Get product with variants, barcodes, images
+      responses:
+        '200':
+          description: Product details
+    put:
+      tags: [Products]
+      summary: Update product
+      responses:
+        '200':
+          description: Updated
+    delete:
+      tags: [Products]
+      summary: Deactivate product
+      responses:
+        '200':
+          description: Deactivated
+
+  /api/v1/products/by-barcode/{barcode}:
+    get:
+      tags: [Products]
+      summary: Lookup product by barcode
+      responses:
+        '200':
+          description: Product details
+
+  /api/v1/products/{id}/price:
+    put:
+      tags: [Products]
+      summary: Update price and record history
+      responses:
+        '200':
+          description: Updated
+
+  /api/v1/products/{id}/price-history:
+    get:
+      tags: [Products]
+      summary: List price history
+      parameters:
+        - name: variantId
+          in: query
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: Paginated price history
+
+  /api/v1/products/{id}/variants:
+    post:
+      tags: [Products]
+      summary: Add product variant
+      responses:
+        '201':
+          description: Created
+
+  /api/v1/products/{id}/barcodes:
+    post:
+      tags: [Products]
+      summary: Add barcode
+      responses:
+        '201':
+          description: Created
+
+  /api/v1/products/{id}/images:
+    post:
+      tags: [Products]
+      summary: Add product image
+      responses:
+        '201':
+          description: Created
+
+  /api/v1/products/dynamic-price:
+    post:
+      tags: [Products]
+      summary: Calculate dynamic price from cost and category markup
+      responses:
+        '200':
+          description: Calculated price with tax
+
+components:
+  parameters:
+    PageParam:
+      name: page
+      in: query
+      schema: { type: integer, default: 0 }
+    SizeParam:
+      name: size
+      in: query
+      schema: { type: integer, default: 20 }
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+security:
+  - bearerAuth: []

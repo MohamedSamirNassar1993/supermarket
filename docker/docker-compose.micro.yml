@@ -1,0 +1,276 @@
+name: ${COMPOSE_PROJECT_NAME:-supermarket-erp-micro}
+
+x-microservice-env: &microservice-env
+  SPRING_PROFILES_ACTIVE: docker
+  DB_HOST: ${DB_HOST:-postgres}
+  DB_PORT: ${DB_PORT:-5432}
+  DB_NAME: ${DB_NAME:-supermarket}
+  DB_USER: ${DB_USER:-supermarket}
+  DB_PASSWORD: ${DB_PASSWORD:-supermarket}
+  REDIS_HOST: ${REDIS_HOST:-redis}
+  REDIS_PORT: ${REDIS_PORT:-6379}
+  REDIS_PASSWORD: ${REDIS_PASSWORD:-}
+  RABBITMQ_HOST: ${RABBITMQ_HOST:-rabbitmq}
+  RABBITMQ_PORT: ${RABBITMQ_PORT:-5672}
+  RABBITMQ_USER: ${RABBITMQ_USER:-supermarket}
+  RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD:-supermarket}
+  EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
+  SUPERMARKET_SECURITY_JWT_SECRET: ${JWT_SECRET:-change-me-to-a-secure-secret-key-at-least-256-bits-long-for-hs256}
+
+x-microservice-build: &microservice-build
+  context: ..
+  dockerfile: docker/Dockerfile.service
+
+services:
+  postgres:
+    profiles: [micro]
+    image: postgres:16-alpine
+    container_name: ${COMPOSE_PROJECT_NAME:-supermarket-erp-micro}-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${DB_NAME:-supermarket}
+      POSTGRES_USER: ${DB_USER:-supermarket}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-supermarket}
+      TZ: UTC
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-supermarket} -d ${DB_NAME:-supermarket}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks: [supermarket-micro-net]
+
+  redis:
+    profiles: [micro]
+    image: redis:7-alpine
+    container_name: ${COMPOSE_PROJECT_NAME:-supermarket-erp-micro}-redis
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks: [supermarket-micro-net]
+
+  rabbitmq:
+    profiles: [micro]
+    image: rabbitmq:3-management-alpine
+    container_name: ${COMPOSE_PROJECT_NAME:-supermarket-erp-micro}-rabbitmq
+    restart: unless-stopped
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-supermarket}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:-supermarket}
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    networks: [supermarket-micro-net]
+
+  eureka-server:
+    profiles: [micro]
+    build:
+      context: ..
+      dockerfile: services/eureka-server/Dockerfile
+    container_name: ${COMPOSE_PROJECT_NAME:-supermarket-erp-micro}-eureka
+    restart: unless-stopped
+    ports:
+      - "${EUREKA_HOST_PORT:-8761}:8761"
+    networks: [supermarket-micro-net]
+
+  api-gateway:
+    profiles: [micro]
+    build:
+      context: ..
+      dockerfile: services/api-gateway/Dockerfile
+    container_name: ${COMPOSE_PROJECT_NAME:-supermarket-erp-micro}-gateway
+    restart: unless-stopped
+    environment:
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
+    ports:
+      - "${GATEWAY_HOST_PORT:-8080}:8080"
+    depends_on:
+      eureka-server:
+        condition: service_started
+    networks: [supermarket-micro-net]
+
+  platform-service:
+    profiles: [micro]
+    build:
+      <<: *microservice-build
+      args:
+        SERVICE_NAME: platform-service
+    environment:
+      <<: *microservice-env
+    depends_on:
+      postgres:
+        condition: service_healthy
+      eureka-server:
+        condition: service_started
+    networks: [supermarket-micro-net]
+
+  auth-service:
+    profiles: [micro]
+    build:
+      <<: *microservice-build
+      args:
+        SERVICE_NAME: auth-service
+    environment:
+      <<: *microservice-env
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      eureka-server:
+        condition: service_started
+    networks: [supermarket-micro-net]
+
+  catalog-service:
+    profiles: [micro]
+    build:
+      <<: *microservice-build
+      args:
+        SERVICE_NAME: catalog-service
+    environment:
+      <<: *microservice-env
+    depends_on:
+      postgres:
+        condition: service_healthy
+      eureka-server:
+        condition: service_started
+    networks: [supermarket-micro-net]
+
+  inventory-service:
+    profiles: [micro]
+    build:
+      <<: *microservice-build
+      args:
+        SERVICE_NAME: inventory-service
+    environment:
+      <<: *microservice-env
+    depends_on:
+      postgres:
+        condition: service_healthy
+      eureka-server:
+        condition: service_started
+    networks: [supermarket-micro-net]
+
+  procurement-service:
+    profiles: [micro]
+    build:
+      <<: *microservice-build
+      args:
+        SERVICE_NAME: procurement-service
+    environment:
+      <<: *microservice-env
+    depends_on:
+      postgres:
+        condition: service_healthy
+      eureka-server:
+        condition: service_started
+    networks: [supermarket-micro-net]
+
+  sales-service:
+    profiles: [micro]
+    build:
+      <<: *microservice-build
+      args:
+        SERVICE_NAME: sales-service
+    environment:
+      <<: *microservice-env
+    depends_on:
+      postgres:
+        condition: service_healthy
+      eureka-server:
+        condition: service_started
+    networks: [supermarket-micro-net]
+
+  operations-service:
+    profiles: [micro]
+    build:
+      <<: *microservice-build
+      args:
+        SERVICE_NAME: operations-service
+    environment:
+      <<: *microservice-env
+    depends_on:
+      postgres:
+        condition: service_healthy
+      eureka-server:
+        condition: service_started
+    networks: [supermarket-micro-net]
+
+  analytics-service:
+    profiles: [micro]
+    build:
+      <<: *microservice-build
+      args:
+        SERVICE_NAME: analytics-service
+    environment:
+      <<: *microservice-env
+    depends_on:
+      postgres:
+        condition: service_healthy
+      eureka-server:
+        condition: service_started
+    networks: [supermarket-micro-net]
+
+  notification-service:
+    profiles: [micro]
+    build:
+      <<: *microservice-build
+      args:
+        SERVICE_NAME: notification-service
+    environment:
+      <<: *microservice-env
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      eureka-server:
+        condition: service_started
+    networks: [supermarket-micro-net]
+
+  # MFE dev servers (Node 20) — use profile dev alongside micro for full stack + UI
+  shell:
+    profiles: [dev]
+    image: node:20-alpine
+    container_name: ${COMPOSE_PROJECT_NAME:-supermarket-erp-micro}-shell
+    working_dir: /app
+    command: sh -c "npm ci && npm run start:shell -- --host 0.0.0.0 --port 4200 --disable-host-check"
+    volumes:
+      - ../apps:/app
+      - shell_node_modules:/app/node_modules
+    ports:
+      - "${SHELL_HOST_PORT:-4200}:4200"
+    depends_on:
+      api-gateway:
+        condition: service_started
+    networks: [supermarket-micro-net]
+
+  mf-auth:
+    profiles: [dev]
+    image: node:20-alpine
+    container_name: ${COMPOSE_PROJECT_NAME:-supermarket-erp-micro}-mf-auth
+    working_dir: /app
+    command: sh -c "npm ci && npm run start:auth -- --host 0.0.0.0 --port 4201 --disable-host-check"
+    volumes:
+      - ../apps:/app
+      - mf_auth_node_modules:/app/node_modules
+    ports:
+      - "${MF_AUTH_HOST_PORT:-4201}:4201"
+    networks: [supermarket-micro-net]
+
+volumes:
+  postgres_data:
+  shell_node_modules:
+  mf_auth_node_modules:
+
+networks:
+  supermarket-micro-net:
+    driver: bridge

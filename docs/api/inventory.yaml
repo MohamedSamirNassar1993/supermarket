@@ -1,0 +1,166 @@
+openapi: 3.0.3
+info:
+  title: Supermarket ERP — Inventory API
+  description: Stock batches, inventory movements, organization valuation settings, low-stock and expiry alerts.
+  version: 0.5.0
+
+servers:
+  - url: http://localhost:8080
+
+tags:
+  - name: Inventory Settings
+  - name: Stock Movements
+  - name: Stock Batches
+  - name: Alerts
+
+paths:
+  /api/v1/inventory/settings:
+    get:
+      tags: [Inventory Settings]
+      summary: Get organization inventory settings
+      parameters:
+        - name: organizationId
+          in: query
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: Settings including valuation_method (FIFO default)
+    put:
+      tags: [Inventory Settings]
+      summary: Update inventory settings
+      responses:
+        '200':
+          description: Updated
+
+  /api/v1/inventory/stock-in:
+    post:
+      tags: [Stock Movements]
+      summary: Record stock receipt
+      description: Creates a stock batch and IN movement.
+      responses:
+        '201':
+          description: Movement recorded
+
+  /api/v1/inventory/stock-out:
+    post:
+      tags: [Stock Movements]
+      summary: Record stock issue
+      description: Allocates batches using COGS strategy (FIFO/LIFO/WAC) and creates OUT movement.
+      responses:
+        '201':
+          description: Movement recorded
+
+  /api/v1/inventory/movements:
+    get:
+      tags: [Stock Movements]
+      summary: List inventory movements
+      parameters:
+        - name: organizationId
+          in: query
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: Paginated movements
+
+  /api/v1/inventory/stock-level:
+    get:
+      tags: [Stock Movements]
+      summary: Get on-hand quantity for product in warehouse
+      parameters:
+        - name: warehouseId
+          in: query
+          required: true
+          schema: { type: string, format: uuid }
+        - name: productId
+          in: query
+          required: true
+          schema: { type: string, format: uuid }
+        - name: variantId
+          in: query
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: Stock level with reorder comparison
+
+  /api/v1/inventory/low-stock:
+    get:
+      tags: [Alerts]
+      summary: List low-stock alerts
+      description: Products where on-hand quantity is below reorder_level.
+      parameters:
+        - name: organizationId
+          in: query
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: Low stock items
+
+  /api/v1/inventory/expiring:
+    get:
+      tags: [Alerts]
+      summary: List batches nearing expiry
+      parameters:
+        - name: organizationId
+          in: query
+          required: true
+          schema: { type: string, format: uuid }
+        - name: days
+          in: query
+          schema: { type: integer, default: 30 }
+      responses:
+        '200':
+          description: Expiring batches
+
+  /api/v1/stock-batches:
+    get:
+      tags: [Stock Batches]
+      summary: List stock batches
+      parameters:
+        - name: organizationId
+          in: query
+          required: true
+          schema: { type: string, format: uuid }
+        - name: warehouseId
+          in: query
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: Paginated batches
+    post:
+      tags: [Stock Batches]
+      summary: Create stock batch manually
+      responses:
+        '201':
+          description: Created
+
+  /api/v1/stock-batches/{id}:
+    get:
+      tags: [Stock Batches]
+      summary: Get stock batch
+      parameters:
+        - name: organizationId
+          in: query
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: Batch details
+
+components:
+  schemas:
+    ValuationMethod:
+      type: string
+      enum: [FIFO, LIFO, WEIGHTED_AVERAGE]
+      default: FIFO
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+security:
+  - bearerAuth: []

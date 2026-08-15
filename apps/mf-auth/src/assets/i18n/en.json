@@ -1,0 +1,13 @@
+{
+  "auth": {
+    "login": "Login",
+    "email": "Email",
+    "password": "Password",
+    "organizationId": "Organization ID",
+    "welcome": "Welcome back",
+    "subtitle": "Sign in to Supermarket ERP"
+  },
+  "common": {
+    "close": "Close"
+  }
+}

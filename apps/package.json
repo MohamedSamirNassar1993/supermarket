@@ -1,0 +1,31 @@
+{
+  "name": "supermarket-apps",
+  "version": "0.0.0",
+  "private": true,
+  "engines": {
+    "node": "^18.19.1 || ^20.11.1 || >=22.0.0"
+  },
+  "workspaces": [
+    "shared-ui",
+    "shell",
+    "mf-auth",
+    "mf-catalog",
+    "mf-inventory",
+    "mf-procurement",
+    "mf-sales",
+    "mf-operations",
+    "mf-analytics"
+  ],
+  "scripts": {
+    "start:shell": "npm run start --workspace=shell",
+    "start:auth": "npm run start --workspace=mf-auth",
+    "start:catalog": "npm run start --workspace=mf-catalog",
+    "start:inventory": "npm run start --workspace=mf-inventory",
+    "start:procurement": "npm run start --workspace=mf-procurement",
+    "start:sales": "npm run start --workspace=mf-sales",
+    "start:operations": "npm run start --workspace=mf-operations",
+    "start:analytics": "npm run start --workspace=mf-analytics",
+    "build:shared-ui": "npm run build --workspace=@supermarket/shared-ui",
+    "build:all": "npm run build:shared-ui && npm run build --workspaces --if-present"
+  }
+}

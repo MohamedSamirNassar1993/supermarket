@@ -1,0 +1,12 @@
+C:\projects\Supermarket\libs\supermarket-common\src\main\java\com\supermarket\common\api\ApiResponse.java
+C:\projects\Supermarket\libs\supermarket-common\src\main\java\com\supermarket\common\api\ErrorCode.java
+C:\projects\Supermarket\libs\supermarket-common\src\main\java\com\supermarket\common\api\PageResponse.java
+C:\projects\Supermarket\libs\supermarket-common\src\main\java\com\supermarket\common\events\DomainEvent.java
+C:\projects\Supermarket\libs\supermarket-common\src\main\java\com\supermarket\common\events\LoginSuccessEvent.java
+C:\projects\Supermarket\libs\supermarket-common\src\main\java\com\supermarket\common\events\LowStockAlertEvent.java
+C:\projects\Supermarket\libs\supermarket-common\src\main\java\com\supermarket\common\events\SaleCompletedEvent.java
+C:\projects\Supermarket\libs\supermarket-common\src\main\java\com\supermarket\common\events\StockAllocatedEvent.java
+C:\projects\Supermarket\libs\supermarket-common\src\main\java\com\supermarket\common\events\StockReceivedEvent.java
+C:\projects\Supermarket\libs\supermarket-common\src\main\java\com\supermarket\common\events\UserCreatedEvent.java
+C:\projects\Supermarket\libs\supermarket-common\src\main\java\com\supermarket\common\security\JwtProperties.java
+C:\projects\Supermarket\libs\supermarket-common\src\main\java\com\supermarket\common\security\JwtTokenValidator.java

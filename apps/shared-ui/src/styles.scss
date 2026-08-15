@@ -1,0 +1,157 @@
+/* You can add global styles to this file, and also import other style files */
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  font-family: Roboto, 'Helvetica Neue', sans-serif;
+  background: #f5f7fa;
+}
+
+[dir='rtl'] {
+  direction: rtl;
+  text-align: right;
+
+  .mat-mdc-form-field-icon-prefix,
+  .mat-mdc-form-field-icon-suffix {
+    order: unset;
+  }
+
+  mat-sidenav-content {
+    margin-inline-start: 0;
+  }
+}
+
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+
+  h1 {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 500;
+  }
+}
+
+.table-container {
+  overflow-x: auto;
+}
+
+.full-width {
+  width: 100%;
+}
+
+.metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 1rem;
+}
+
+.metric-card {
+  mat-card-content {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .metric-value {
+    font-size: 1.75rem;
+    font-weight: 600;
+    color: #1565c0;
+  }
+
+  .metric-label {
+    color: rgba(0, 0, 0, 0.6);
+    font-size: 0.875rem;
+  }
+}
+
+.snack-success {
+  --mdc-snackbar-container-color: #2e7d32;
+  --mdc-snackbar-supporting-text-color: #fff;
+}
+
+.snack-error {
+  --mdc-snackbar-container-color: #c62828;
+  --mdc-snackbar-supporting-text-color: #fff;
+}
+
+.pos-layout {
+  display: grid;
+  grid-template-columns: 1fr 380px;
+  gap: 1rem;
+  min-height: calc(100vh - 120px);
+
+  @media (max-width: 960px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.cart-panel {
+  position: sticky;
+  top: 80px;
+  align-self: start;
+}
+
+.offline-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem 0.75rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  background: #fff3e0;
+  color: #e65100;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: rgba(0, 0, 0, 0.54);
+
+  mat-icon {
+    font-size: 48px;
+    width: 48px;
+    height: 48px;
+    margin-bottom: 0.5rem;
+  }
+}
+
+.inline-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+  margin: 1rem 0;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+
+  .full-width {
+    grid-column: 1 / -1;
+  }
+}
+
+.clickable-row {
+  cursor: pointer;
+
+  &:hover {
+    background: rgba(0, 0, 0, 0.04);
+  }
+}
+
+.tab-toolbar {
+  display: flex;
+  gap: 0.75rem;
+  margin: 1rem 0;
+}

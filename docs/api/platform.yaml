@@ -1,0 +1,843 @@
+openapi: 3.0.3
+info:
+  title: Supermarket ERP — Platform API
+  description: |
+    OpenAPI fragment for platform foundation endpoints: health checks, organizations,
+    branches, currencies, and exchange rates. All business endpoints return the
+    standardized `ApiResponse` envelope unless noted otherwise.
+  version: 0.1.0
+  contact:
+    name: Supermarket ERP
+
+servers:
+  - url: http://localhost:8080
+    description: Local backend (dev profile)
+  - url: http://localhost/api
+    description: Production via Nginx (prod profile)
+
+tags:
+  - name: Health
+    description: Service health and readiness
+  - name: Organizations
+    description: Tenant organization management
+  - name: Branches
+    description: Branch management within an organization
+  - name: Currencies
+    description: Currency master data
+  - name: Exchange Rates
+    description: Currency exchange rate management
+
+paths:
+  /api/v1/health:
+    get:
+      tags: [Health]
+      summary: Application health check
+      description: Returns service status. Public endpoint (no authentication required).
+      operationId: getHealth
+      responses:
+        '200':
+          description: Service is running
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/HealthData'
+              example:
+                success: true
+                data:
+                  status: UP
+                  service: supermarket-erp
+                  timestamp: '2026-08-10T17:00:00Z'
+                timestamp: '2026-08-10T17:00:00Z'
+
+  /actuator/health:
+    get:
+      tags: [Health]
+      summary: Spring Boot Actuator health
+      description: Standard actuator health endpoint used by Docker and Kubernetes probes.
+      operationId: getActuatorHealth
+      responses:
+        '200':
+          description: Health status
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    enum: [UP, DOWN]
+                  components:
+                    type: object
+                    additionalProperties: true
+
+  /api/v1/platform/organizations:
+    get:
+      tags: [Organizations]
+      summary: List organizations
+      operationId: listOrganizations
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/SizeParam'
+        - $ref: '#/components/parameters/SortParam'
+        - name: search
+          in: query
+          schema:
+            type: string
+          description: Search by code or name
+        - name: active
+          in: query
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: Paginated organization list
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/PageOrganization'
+    post:
+      tags: [Organizations]
+      summary: Create organization
+      operationId: createOrganization
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrganizationCreateRequest'
+      responses:
+        '201':
+          description: Organization created
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/OrganizationResponse'
+
+  /api/v1/platform/organizations/{organizationId}:
+    get:
+      tags: [Organizations]
+      summary: Get organization by ID
+      operationId: getOrganization
+      parameters:
+        - $ref: '#/components/parameters/OrganizationId'
+      responses:
+        '200':
+          description: Organization details
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/OrganizationResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    put:
+      tags: [Organizations]
+      summary: Update organization
+      operationId: updateOrganization
+      parameters:
+        - $ref: '#/components/parameters/OrganizationId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrganizationUpdateRequest'
+      responses:
+        '200':
+          description: Organization updated
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/OrganizationResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /api/v1/platform/organizations/{organizationId}/branches:
+    get:
+      tags: [Branches]
+      summary: List branches for an organization
+      operationId: listBranches
+      parameters:
+        - $ref: '#/components/parameters/OrganizationId'
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/SizeParam'
+        - $ref: '#/components/parameters/SortParam'
+        - name: active
+          in: query
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: Paginated branch list
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/PageBranch'
+    post:
+      tags: [Branches]
+      summary: Create branch
+      operationId: createBranch
+      parameters:
+        - $ref: '#/components/parameters/OrganizationId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BranchCreateRequest'
+      responses:
+        '201':
+          description: Branch created
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/BranchResponse'
+
+  /api/v1/platform/organizations/{organizationId}/branches/{branchId}:
+    get:
+      tags: [Branches]
+      summary: Get branch by ID
+      operationId: getBranch
+      parameters:
+        - $ref: '#/components/parameters/OrganizationId'
+        - $ref: '#/components/parameters/BranchId'
+      responses:
+        '200':
+          description: Branch details
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/BranchResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    put:
+      tags: [Branches]
+      summary: Update branch
+      operationId: updateBranch
+      parameters:
+        - $ref: '#/components/parameters/OrganizationId'
+        - $ref: '#/components/parameters/BranchId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BranchUpdateRequest'
+      responses:
+        '200':
+          description: Branch updated
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/BranchResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /api/v1/platform/currencies:
+    get:
+      tags: [Currencies]
+      summary: List currencies
+      operationId: listCurrencies
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/SizeParam'
+        - name: active
+          in: query
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: Paginated currency list
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/PageCurrency'
+    post:
+      tags: [Currencies]
+      summary: Create currency
+      operationId: createCurrency
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CurrencyCreateRequest'
+      responses:
+        '201':
+          description: Currency created
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/CurrencyResponse'
+
+  /api/v1/platform/currencies/{currencyId}:
+    get:
+      tags: [Currencies]
+      summary: Get currency by ID
+      operationId: getCurrency
+      parameters:
+        - $ref: '#/components/parameters/CurrencyId'
+      responses:
+        '200':
+          description: Currency details
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/CurrencyResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /api/v1/platform/exchange-rates:
+    get:
+      tags: [Exchange Rates]
+      summary: List exchange rates
+      operationId: listExchangeRates
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/SizeParam'
+        - name: fromCurrencyId
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: toCurrencyId
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: effectiveDate
+          in: query
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: Paginated exchange rate list
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/PageExchangeRate'
+    post:
+      tags: [Exchange Rates]
+      summary: Create exchange rate
+      operationId: createExchangeRate
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExchangeRateCreateRequest'
+      responses:
+        '201':
+          description: Exchange rate created
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/ExchangeRateResponse'
+
+  /api/v1/platform/exchange-rates/lookup:
+    get:
+      tags: [Exchange Rates]
+      summary: Look up effective exchange rate
+      description: Returns the rate effective on or before the given date for a currency pair.
+      operationId: lookupExchangeRate
+      parameters:
+        - name: fromCurrencyCode
+          in: query
+          required: true
+          schema:
+            type: string
+            minLength: 3
+            maxLength: 3
+            example: USD
+        - name: toCurrencyCode
+          in: query
+          required: true
+          schema:
+            type: string
+            minLength: 3
+            maxLength: 3
+            example: SAR
+        - name: asOfDate
+          in: query
+          schema:
+            type: string
+            format: date
+          description: Defaults to today (UTC)
+      responses:
+        '200':
+          description: Matching exchange rate
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/ExchangeRateResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+components:
+  parameters:
+    PageParam:
+      name: page
+      in: query
+      schema:
+        type: integer
+        minimum: 0
+        default: 0
+    SizeParam:
+      name: size
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 20
+    SortParam:
+      name: sort
+      in: query
+      schema:
+        type: string
+        example: name,asc
+      description: Spring Data sort parameter (field,direction)
+    OrganizationId:
+      name: organizationId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    BranchId:
+      name: branchId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    CurrencyId:
+      name: currencyId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+
+  responses:
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiResponse'
+          example:
+            success: false
+            errorCode: NOT_FOUND
+            message: Resource not found
+            timestamp: '2026-08-10T17:00:00Z'
+
+  schemas:
+    ApiResponse:
+      type: object
+      required: [success, timestamp]
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        errorCode:
+          type: string
+        data:
+          type: object
+        errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/FieldError'
+        timestamp:
+          type: string
+          format: date-time
+
+    FieldError:
+      type: object
+      required: [field, message]
+      properties:
+        field:
+          type: string
+        message:
+          type: string
+
+    HealthData:
+      type: object
+      required: [status, service, timestamp]
+      properties:
+        status:
+          type: string
+          enum: [UP, DOWN]
+        service:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+
+    PageMetadata:
+      type: object
+      required: [content, page, size, totalElements, totalPages]
+      properties:
+        content:
+          type: array
+          items: {}
+        page:
+          type: integer
+        size:
+          type: integer
+        totalElements:
+          type: integer
+          format: int64
+        totalPages:
+          type: integer
+
+    OrganizationCreateRequest:
+      type: object
+      required: [code, name]
+      properties:
+        code:
+          type: string
+          maxLength: 50
+          pattern: '^[A-Z0-9_-]+$'
+        name:
+          type: string
+          maxLength: 255
+        legalName:
+          type: string
+          maxLength: 255
+        taxId:
+          type: string
+          maxLength: 100
+        email:
+          type: string
+          format: email
+        phone:
+          type: string
+          maxLength: 50
+        address:
+          type: string
+
+    OrganizationUpdateRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          maxLength: 255
+        legalName:
+          type: string
+          maxLength: 255
+        taxId:
+          type: string
+          maxLength: 100
+        email:
+          type: string
+          format: email
+        phone:
+          type: string
+          maxLength: 50
+        address:
+          type: string
+        active:
+          type: boolean
+
+    OrganizationResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        code:
+          type: string
+        name:
+          type: string
+        legalName:
+          type: string
+        taxId:
+          type: string
+        email:
+          type: string
+        phone:
+          type: string
+        address:
+          type: string
+        active:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    BranchCreateRequest:
+      type: object
+      required: [code, name]
+      properties:
+        code:
+          type: string
+          maxLength: 50
+        name:
+          type: string
+          maxLength: 255
+        address:
+          type: string
+        phone:
+          type: string
+          maxLength: 50
+
+    BranchUpdateRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          maxLength: 255
+        address:
+          type: string
+        phone:
+          type: string
+          maxLength: 50
+        active:
+          type: boolean
+
+    BranchResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        organizationId:
+          type: string
+          format: uuid
+        code:
+          type: string
+        name:
+          type: string
+        address:
+          type: string
+        phone:
+          type: string
+        active:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    CurrencyCreateRequest:
+      type: object
+      required: [code, name]
+      properties:
+        code:
+          type: string
+          minLength: 3
+          maxLength: 3
+          pattern: '^[A-Z]{3}$'
+        name:
+          type: string
+          maxLength: 100
+        symbol:
+          type: string
+          maxLength: 10
+        decimalPlaces:
+          type: integer
+          minimum: 0
+          maximum: 4
+          default: 2
+
+    CurrencyResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        code:
+          type: string
+        name:
+          type: string
+        symbol:
+          type: string
+        decimalPlaces:
+          type: integer
+        active:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    ExchangeRateCreateRequest:
+      type: object
+      required: [fromCurrencyId, toCurrencyId, rate, effectiveDate]
+      properties:
+        fromCurrencyId:
+          type: string
+          format: uuid
+        toCurrencyId:
+          type: string
+          format: uuid
+        rate:
+          type: number
+          minimum: 0
+          exclusiveMinimum: true
+        effectiveDate:
+          type: string
+          format: date
+        source:
+          type: string
+          maxLength: 100
+
+    ExchangeRateResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        fromCurrencyId:
+          type: string
+          format: uuid
+        toCurrencyId:
+          type: string
+          format: uuid
+        fromCurrencyCode:
+          type: string
+        toCurrencyCode:
+          type: string
+        rate:
+          type: number
+        effectiveDate:
+          type: string
+          format: date
+        source:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+
+    PageOrganization:
+      allOf:
+        - $ref: '#/components/schemas/PageMetadata'
+        - type: object
+          properties:
+            content:
+              type: array
+              items:
+                $ref: '#/components/schemas/OrganizationResponse'
+
+    PageBranch:
+      allOf:
+        - $ref: '#/components/schemas/PageMetadata'
+        - type: object
+          properties:
+            content:
+              type: array
+              items:
+                $ref: '#/components/schemas/BranchResponse'
+
+    PageCurrency:
+      allOf:
+        - $ref: '#/components/schemas/PageMetadata'
+        - type: object
+          properties:
+            content:
+              type: array
+              items:
+                $ref: '#/components/schemas/CurrencyResponse'
+
+    PageExchangeRate:
+      allOf:
+        - $ref: '#/components/schemas/PageMetadata'
+        - type: object
+          properties:
+            content:
+              type: array
+              items:
+                $ref: '#/components/schemas/ExchangeRateResponse'
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+security:
+  - bearerAuth: []

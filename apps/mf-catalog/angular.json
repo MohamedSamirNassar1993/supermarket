@@ -1,0 +1,75 @@
+﻿{
+  "$schema": "./node_modules/@angular/cli/lib/config/schema.json",
+  "version": 1,
+  "newProjectRoot": ".",
+  "projects": {
+    "mf-catalog": {
+      "projectType": "application",
+      "schematics": { "@schematics/angular:component": { "style": "scss" } },
+      "root": "",
+      "sourceRoot": "src",
+      "prefix": "app",
+      "architect": {
+        "build": {
+          "builder": "@angular-architects/native-federation:build",
+          "options": { "target": "mf-catalog:esbuild:production" },
+          "configurations": {
+            "production": { "target": "mf-catalog:esbuild:production" },
+            "development": { "target": "mf-catalog:esbuild:development", "dev": true }
+          },
+          "defaultConfiguration": "production"
+        },
+        "serve": {
+          "builder": "@angular-architects/native-federation:serve",
+          "options": {
+            "target": "mf-catalog:serve-original:development",
+            "rebuildDelay": 0,
+            "dev": true,
+            "port": 4202
+          },
+          "configurations": {
+            "production": { "target": "mf-catalog:serve-original:production" },
+            "development": { "target": "mf-catalog:serve-original:development" }
+          },
+          "defaultConfiguration": "development"
+        },
+        "esbuild": {
+          "builder": "@angular-devkit/build-angular:application",
+          "options": {
+            "outputPath": "dist/mf-catalog",
+            "index": "src/index.html",
+            "browser": "src/main.ts",
+            "polyfills": ["zone.js", "es-module-shims"],
+            "tsConfig": "tsconfig.app.json",
+            "inlineStyleLanguage": "scss",
+            "assets": [{ "glob": "**/*", "input": "public" }],
+            "styles": [
+              "@angular/material/prebuilt-themes/azure-blue.css",
+              "src/styles.scss"
+            ]
+          },
+          "configurations": {
+            "production": {
+              "budgets": [{ "type": "initial", "maximumWarning": "500kB", "maximumError": "1MB" }],
+              "outputHashing": "all"
+            },
+            "development": {
+              "optimization": false,
+              "extractLicenses": false,
+              "sourceMap": true
+            }
+          },
+          "defaultConfiguration": "production"
+        },
+        "serve-original": {
+          "builder": "@angular-devkit/build-angular:dev-server",
+          "configurations": {
+            "production": { "buildTarget": "mf-catalog:esbuild:production" },
+            "development": { "buildTarget": "mf-catalog:esbuild:development" }
+          },
+          "defaultConfiguration": "development"
+        }
+      }
+    }
+  }
+}

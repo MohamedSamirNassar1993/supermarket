@@ -1,0 +1,168 @@
+openapi: 3.0.3
+info:
+  title: Supermarket ERP — Warehouse API
+  description: Warehouse master data, inter-warehouse transfers, stock counts, and inventory adjustments.
+  version: 0.4.0
+
+servers:
+  - url: http://localhost:8080
+
+tags:
+  - name: Warehouses
+  - name: Transfers
+  - name: Stock Counts
+  - name: Adjustments
+
+paths:
+  /api/v1/warehouses:
+    get:
+      tags: [Warehouses]
+      summary: List warehouses
+      parameters:
+        - name: organizationId
+          in: query
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: Paginated warehouses
+    post:
+      tags: [Warehouses]
+      summary: Create warehouse
+      responses:
+        '201':
+          description: Created
+
+  /api/v1/warehouses/{id}:
+    get:
+      tags: [Warehouses]
+      summary: Get warehouse
+      responses:
+        '200':
+          description: Warehouse details
+    put:
+      tags: [Warehouses]
+      summary: Update warehouse
+      responses:
+        '200':
+          description: Updated
+
+  /api/v1/warehouses/transfers:
+    get:
+      tags: [Transfers]
+      summary: List transfers
+      parameters:
+        - name: organizationId
+          in: query
+          required: true
+          schema: { type: string, format: uuid }
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [DRAFT, IN_TRANSIT, RECEIVED, CANCELLED]
+      responses:
+        '200':
+          description: Paginated transfers
+    post:
+      tags: [Transfers]
+      summary: Create transfer (DRAFT)
+      responses:
+        '201':
+          description: Created
+
+  /api/v1/warehouses/transfers/{id}:
+    get:
+      tags: [Transfers]
+      summary: Get transfer with lines
+      responses:
+        '200':
+          description: Transfer details
+
+  /api/v1/warehouses/transfers/{id}/ship:
+    post:
+      tags: [Transfers]
+      summary: Ship transfer (DRAFT → IN_TRANSIT)
+      description: Creates TRANSFER_OUT inventory movements at source warehouse.
+      responses:
+        '200':
+          description: Shipped
+
+  /api/v1/warehouses/transfers/{id}/receive:
+    post:
+      tags: [Transfers]
+      summary: Receive transfer (IN_TRANSIT → RECEIVED)
+      description: Creates TRANSFER_IN batches at destination warehouse.
+      responses:
+        '200':
+          description: Received
+
+  /api/v1/warehouses/transfers/{id}/cancel:
+    post:
+      tags: [Transfers]
+      summary: Cancel draft transfer
+      responses:
+        '200':
+          description: Cancelled
+
+  /api/v1/warehouses/stock-counts:
+    get:
+      tags: [Stock Counts]
+      summary: List stock counts
+      responses:
+        '200':
+          description: Paginated stock counts
+    post:
+      tags: [Stock Counts]
+      summary: Create stock count (DRAFT)
+      responses:
+        '201':
+          description: Created
+
+  /api/v1/warehouses/stock-counts/{id}/start:
+    post:
+      tags: [Stock Counts]
+      summary: Start count (DRAFT → IN_PROGRESS)
+      responses:
+        '200':
+          description: Started
+
+  /api/v1/warehouses/stock-counts/{id}/complete:
+    post:
+      tags: [Stock Counts]
+      summary: Complete count and post variance adjustments
+      responses:
+        '200':
+          description: Completed
+
+  /api/v1/warehouses/adjustments:
+    get:
+      tags: [Adjustments]
+      summary: List inventory adjustments
+      responses:
+        '200':
+          description: Paginated adjustments
+    post:
+      tags: [Adjustments]
+      summary: Create adjustment (DRAFT)
+      responses:
+        '201':
+          description: Created
+
+  /api/v1/warehouses/adjustments/{id}/apply:
+    post:
+      tags: [Adjustments]
+      summary: Apply adjustment and create inventory movements
+      responses:
+        '200':
+          description: Applied
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+security:
+  - bearerAuth: []
